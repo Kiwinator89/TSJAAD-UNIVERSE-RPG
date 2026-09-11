@@ -6,358 +6,115 @@
 <title>Meester Gijs-hel</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --void:#0a0608;--deep:#120d10;--mid:#1e1219;--surface:#2a1a22;
+    --blood:#8b1a1a;--crimson:#c0392b;--ember:#e8621a;
+    --ash:#b8a898;--bone:#d4c8b8;--soul:#7ab8d4;--gold:#c8a84b;
+  }
+  html,body{width:100%;height:100%;background:var(--void);color:var(--bone);font-family:'Crimson Text',serif;overflow:hidden}
+  .screen{position:absolute;inset:0;display:none}
+  .screen.active{display:flex}
 
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  /* TITLE */
+  #title-screen{flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 30%,#2a0a0a 0%,var(--void) 70%)}
+  #title-screen::before{content:'';position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(139,26,26,0.03) 2px,rgba(139,26,26,0.03) 4px)}
+  .title-hell{font-family:'Cinzel',serif;font-size:clamp(2rem,6vw,5rem);font-weight:900;letter-spacing:0.15em;color:var(--crimson);text-shadow:0 0 40px rgba(192,57,43,0.6),0 0 80px rgba(192,57,43,0.2);margin-bottom:0.2em}
+  .title-sub{font-family:'Cinzel',serif;font-size:clamp(0.8rem,2vw,1.2rem);letter-spacing:0.4em;color:var(--ash);margin-bottom:3em}
+  .title-lore{max-width:480px;text-align:center;font-size:1.1rem;line-height:1.8;color:var(--ash);font-style:italic;margin-bottom:3em;padding:0 1rem}
+  .btn{font-family:'Cinzel',serif;font-size:1rem;letter-spacing:0.2em;color:var(--bone);background:transparent;border:1px solid var(--blood);padding:0.8em 2.5em;cursor:pointer;transition:all 0.2s}
+  .btn:hover{background:var(--blood);color:#fff;box-shadow:0 0 20px rgba(139,26,26,0.5)}
 
-  :root {
-    --void: #0a0608;
-    --deep: #120d10;
-    --mid: #1e1219;
-    --surface: #2a1a22;
-    --blood: #8b1a1a;
-    --crimson: #c0392b;
-    --ember: #e8621a;
-    --ash: #b8a898;
-    --bone: #d4c8b8;
-    --soul: #7ab8d4;
-    --gold: #c8a84b;
-  }
+  /* HUD */
+  #hud{position:fixed;top:0;left:0;right:0;padding:12px 20px;display:none;align-items:center;gap:2rem;background:linear-gradient(to bottom,rgba(10,6,8,0.95),transparent);z-index:100;font-family:'Cinzel',serif;font-size:0.75rem;letter-spacing:0.1em}
+  #hud.visible{display:flex}
+  .hud-label{color:var(--ash);font-size:0.65rem;letter-spacing:0.15em}
+  .hp-bar-wrap{display:flex;flex-direction:column;gap:3px}
+  .hp-bar-track{width:160px;height:6px;background:var(--surface);border:1px solid var(--blood)}
+  .hp-bar-fill{height:100%;background:var(--crimson);transition:width 0.3s}
+  .hp-text{color:var(--bone)}
+  .heal-dots{display:flex;gap:5px;align-items:center}
+  .heal-dot{width:10px;height:10px;border-radius:50%;background:var(--soul);border:1px solid #fff2}
+  .heal-dot.used{background:var(--surface)}
+  .location-tag{margin-left:auto;color:var(--ash);font-style:italic;font-family:'Crimson Text',serif;font-size:0.85rem}
 
-  html, body {
-    width: 100%; height: 100%;
-    background: var(--void);
-    color: var(--bone);
-    font-family: 'Crimson Text', serif;
-    overflow: hidden;
-  }
+  /* MAP */
+  #map-screen{flex-direction:column;background:var(--void)}
+  #map-canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
 
-  /* ── SCREENS ── */
-  .screen { position: absolute; inset: 0; display: none; }
-  .screen.active { display: flex; }
+  /* LORE POPUP */
+  #lore-popup{
+    position:fixed;bottom:60px;left:50%;transform:translateX(-50%);
+    background:rgba(10,6,8,0.95);border:1px solid var(--blood);
+    padding:1rem 1.5rem;max-width:420px;text-align:center;
+    font-style:italic;font-size:0.95rem;color:var(--ash);line-height:1.6;
+    display:none;z-index:150;pointer-events:none;
+  }
+  #lore-popup.visible{display:block}
+  #lore-popup .lore-title{font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:0.2em;color:var(--blood);margin-bottom:0.4rem}
 
-  /* ── TITLE SCREEN ── */
-  #title-screen {
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: radial-gradient(ellipse at 50% 30%, #2a0a0a 0%, var(--void) 70%);
-  }
-  #title-screen::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(139,26,26,0.03) 2px, rgba(139,26,26,0.03) 4px);
-    pointer-events: none;
-  }
-  .title-hell {
-    font-family: 'Cinzel', serif;
-    font-size: clamp(2rem, 6vw, 5rem);
-    font-weight: 900;
-    letter-spacing: 0.15em;
-    color: var(--crimson);
-    text-shadow: 0 0 40px rgba(192,57,43,0.6), 0 0 80px rgba(192,57,43,0.2);
-    margin-bottom: 0.2em;
-  }
-  .title-sub {
-    font-family: 'Cinzel', serif;
-    font-size: clamp(0.8rem, 2vw, 1.2rem);
-    letter-spacing: 0.4em;
-    color: var(--ash);
-    margin-bottom: 3em;
-  }
-  .title-lore {
-    max-width: 480px;
-    text-align: center;
-    font-size: 1.1rem;
-    line-height: 1.8;
-    color: var(--ash);
-    font-style: italic;
-    margin-bottom: 3em;
-    padding: 0 1rem;
-  }
-  .btn {
-    font-family: 'Cinzel', serif;
-    font-size: 1rem;
-    letter-spacing: 0.2em;
-    color: var(--bone);
-    background: transparent;
-    border: 1px solid var(--blood);
-    padding: 0.8em 2.5em;
-    cursor: pointer;
-    transition: all 0.2s;
-    position: relative;
-  }
-  .btn:hover {
-    background: var(--blood);
-    color: #fff;
-    box-shadow: 0 0 20px rgba(139,26,26,0.5);
-  }
+  /* COMBAT */
+  #combat-screen{flex-direction:column;align-items:center;justify-content:flex-start;background:radial-gradient(ellipse at 50% 100%,#1a0505 0%,var(--void) 60%);padding-top:60px;gap:0.5rem}
+  .combat-arena{display:flex;align-items:flex-end;justify-content:space-around;width:100%;max-width:700px;height:180px;position:relative;margin-bottom:0.5rem}
+  .combatant{display:flex;flex-direction:column;align-items:center;gap:6px}
+  .combatant-sprite{width:80px;height:80px;image-rendering:pixelated;object-fit:contain;filter:drop-shadow(0 0 12px rgba(192,57,43,0.3))}
+  .combatant-sprite.shake{animation:shake 0.4s}
+  @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+  .combatant-name{font-family:'Cinzel',serif;font-size:0.7rem;letter-spacing:0.1em;color:var(--ash)}
+  .combatant-hp-track{width:90px;height:5px;background:var(--surface);border:1px solid var(--blood)}
+  .combatant-hp-fill{height:100%;background:var(--crimson);transition:width 0.3s}
+  .vs-line{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-family:'Cinzel',serif;font-size:1.5rem;color:var(--blood);opacity:0.4}
+  #combat-log{width:100%;max-width:600px;min-height:50px;text-align:center;font-size:1.05rem;font-style:italic;color:var(--bone);line-height:1.5;padding:0 1rem}
 
-  /* ── HUD ── */
-  #hud {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    padding: 12px 20px;
-    display: none;
-    align-items: center;
-    gap: 2rem;
-    background: linear-gradient(to bottom, rgba(10,6,8,0.95), transparent);
-    z-index: 100;
-    font-family: 'Cinzel', serif;
-    font-size: 0.75rem;
-    letter-spacing: 0.1em;
-  }
-  #hud.visible { display: flex; }
-  .hud-label { color: var(--ash); font-size: 0.65rem; letter-spacing: 0.15em; }
-  .hp-bar-wrap { display: flex; flex-direction: column; gap: 3px; }
-  .hp-bar-track { width: 160px; height: 6px; background: var(--surface); border: 1px solid var(--blood); }
-  .hp-bar-fill { height: 100%; background: var(--crimson); transition: width 0.3s; }
-  .hp-text { color: var(--bone); }
-  .heal-dots { display: flex; gap: 5px; align-items: center; }
-  .heal-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--soul); border: 1px solid #fff2; }
-  .heal-dot.used { background: var(--surface); }
-  .location-tag { margin-left: auto; color: var(--ash); font-style: italic; font-family: 'Crimson Text', serif; font-size: 0.85rem; }
+  /* ATTACK */
+  #attack-wrap{display:none;flex-direction:column;align-items:center;gap:6px;width:100%;max-width:520px}
+  #attack-wrap.visible{display:flex}
+  .attack-label{font-family:'Cinzel',serif;font-size:0.7rem;letter-spacing:0.15em;color:var(--ash)}
+  #attack-track{width:100%;height:28px;background:var(--surface);border:1px solid var(--blood);position:relative;overflow:hidden;cursor:pointer}
+  #attack-perfect{position:absolute;top:0;height:100%;background:rgba(74,200,100,0.3);border-left:2px solid #4ac864;border-right:2px solid #4ac864}
+  #attack-good{position:absolute;top:0;height:100%;background:rgba(200,168,75,0.2);border-left:1px solid var(--gold);border-right:1px solid var(--gold)}
+  #attack-cursor{position:absolute;top:0;width:3px;height:100%;background:#fff;box-shadow:0 0 8px #fff}
+  #attack-streak-bar{display:flex;gap:4px;align-items:center}
+  .streak-pip{width:14px;height:14px;border:1px solid var(--blood);background:var(--surface);transition:background 0.15s}
+  .streak-pip.hit{background:var(--gold);border-color:var(--gold)}
+  .streak-pip.perfect{background:#4ac864;border-color:#4ac864}
 
-  /* ── MAP SCREEN ── */
-  #map-screen {
-    flex-direction: column;
-    background: var(--void);
-  }
-  #map-canvas {
-    display: block;
-    width: 100%;
-    height: 100%;
-    image-rendering: pixelated;
-  }
+  /* DODGE */
+  #dodge-wrap{display:none;flex-direction:column;align-items:center;gap:6px;width:100%;max-width:520px}
+  #dodge-wrap.visible{display:flex}
+  #dodge-attack-name{font-family:'Cinzel',serif;font-size:0.85rem;color:var(--crimson);letter-spacing:0.1em;text-align:center;min-height:1.3rem}
+  #dodge-arena{display:block;border:3px solid var(--soul);box-shadow:0 0 20px rgba(122,184,212,0.25);background:#080408;image-rendering:pixelated}
+  #dodge-hint{font-size:0.78rem;color:var(--ash)}
 
-  /* ── COMBAT SCREEN ── */
-  #combat-screen {
-    flex-direction: column;
-    background: radial-gradient(ellipse at 50% 100%, #1a0505 0%, var(--void) 60%);
-    align-items: center;
-    justify-content: flex-start;
-    padding-top: 60px;
-  }
-  .combat-arena {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-around;
-    width: 100%;
-    max-width: 700px;
-    height: 220px;
-    position: relative;
-    margin-bottom: 1rem;
-  }
-  .combatant { display: flex; flex-direction: column; align-items: center; gap: 8px; }
-  .combatant-sprite {
-    width: 80px; height: 80px;
-    image-rendering: pixelated;
-    object-fit: contain;
-    filter: drop-shadow(0 0 12px rgba(192,57,43,0.3));
-  }
-  .combatant-sprite.shake { animation: shake 0.4s; }
-  @keyframes shake {
-    0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)}
-  }
-  .combatant-name {
-    font-family: 'Cinzel', serif;
-    font-size: 0.7rem;
-    letter-spacing: 0.1em;
-    color: var(--ash);
-  }
-  .combatant-hp-track { width: 90px; height: 5px; background: var(--surface); border: 1px solid var(--blood); }
-  .combatant-hp-fill { height: 100%; background: var(--crimson); transition: width 0.3s; }
+  /* ACTIONS */
+  #combat-actions{display:flex;gap:1rem;margin-top:0.25rem}
+  .action-btn{font-family:'Cinzel',serif;font-size:0.85rem;letter-spacing:0.15em;color:var(--bone);background:var(--surface);border:1px solid var(--blood);padding:0.65em 1.6em;cursor:pointer;transition:all 0.2s}
+  .action-btn:hover:not(:disabled){background:var(--blood);box-shadow:0 0 15px rgba(139,26,26,0.5)}
+  .action-btn:disabled{opacity:0.35;cursor:default}
+  .action-btn.heal-btn{border-color:var(--soul)}
+  .action-btn.heal-btn:hover:not(:disabled){background:#1a3a4a;box-shadow:0 0 15px rgba(122,184,212,0.4)}
 
-  .vs-line {
-    position: absolute;
-    left: 50%; top: 50%;
-    transform: translate(-50%,-50%);
-    font-family: 'Cinzel', serif;
-    font-size: 1.5rem;
-    color: var(--blood);
-    opacity: 0.4;
-  }
+  /* RESULT */
+  #gameover-screen,#victory-screen{flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem}
+  #gameover-screen{background:radial-gradient(ellipse at center,#1a0000 0%,var(--void) 70%)}
+  #victory-screen{background:radial-gradient(ellipse at center,#001a2a 0%,var(--void) 70%)}
+  .result-title{font-family:'Cinzel',serif;font-size:clamp(2rem,5vw,4rem);font-weight:900;letter-spacing:0.2em;margin-bottom:0.5em}
+  #gameover-screen .result-title{color:var(--crimson);text-shadow:0 0 40px rgba(192,57,43,0.5)}
+  #victory-screen .result-title{color:var(--soul);text-shadow:0 0 40px rgba(122,184,212,0.5)}
+  .result-body{max-width:480px;font-size:1.15rem;line-height:1.9;font-style:italic;color:var(--ash);margin-bottom:2.5em}
 
-  /* combat log */
-  #combat-log {
-    width: 100%;
-    max-width: 600px;
-    min-height: 60px;
-    text-align: center;
-    font-size: 1.1rem;
-    font-style: italic;
-    color: var(--bone);
-    line-height: 1.6;
-    padding: 0 1rem;
-    margin-bottom: 1rem;
-  }
-
-  /* timing bar */
-  #timing-wrap {
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    width: 100%;
-    max-width: 500px;
-    margin-bottom: 1rem;
-  }
-  #timing-wrap.visible { display: flex; }
-  .timing-label { font-size: 0.75rem; letter-spacing: 0.15em; color: var(--ash); font-family: 'Cinzel', serif; }
-  #timing-track {
-    width: 100%;
-    height: 30px;
-    background: var(--surface);
-    border: 1px solid var(--blood);
-    position: relative;
-    overflow: hidden;
-  }
-  #timing-zone {
-    position: absolute;
-    top: 0; height: 100%;
-    background: rgba(200,168,75,0.25);
-    border-left: 2px solid var(--gold);
-    border-right: 2px solid var(--gold);
-    transition: left 0.1s, width 0.1s;
-  }
-  #timing-zone.perfect-zone { background: rgba(74,200,100,0.25); border-color: #4ac864; }
-  #timing-cursor {
-    position: absolute;
-    top: 0; width: 3px; height: 100%;
-    background: #fff;
-    box-shadow: 0 0 8px #fff;
-  }
-  .timing-hint { font-size: 0.8rem; color: var(--ash); }
-
-  /* dodge bar */
-  #dodge-wrap {
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    width: 100%;
-    max-width: 500px;
-    margin-bottom: 1rem;
-  }
-  #dodge-wrap.visible { display: flex; }
-  #dodge-track {
-    width: 100%;
-    height: 40px;
-    background: var(--surface);
-    border: 1px solid var(--crimson);
-    position: relative;
-    overflow: hidden;
-  }
-  #dodge-attack-bar {
-    position: absolute;
-    top: 0; height: 100%;
-    background: var(--crimson);
-    width: 40px;
-    border-right: 3px solid #ff4444;
-    box-shadow: 0 0 10px rgba(192,57,43,0.6);
-    transition: left 0.05s linear;
-  }
-  #dodge-window {
-    position: absolute;
-    top: 0; height: 100%;
-    background: rgba(122,184,212,0.2);
-    border-left: 2px solid var(--soul);
-    border-right: 2px solid var(--soul);
-  }
-  .dodge-hint { font-size: 0.85rem; color: var(--soul); letter-spacing: 0.1em; font-family: 'Cinzel', serif; }
-  #dodge-countdown {
-    font-family: 'Cinzel', serif;
-    font-size: 1.4rem;
-    color: var(--crimson);
-    min-height: 1.8rem;
-  }
-
-  /* combat actions */
-  #combat-actions {
-    display: flex;
-    gap: 1rem;
-    margin-top: 0.5rem;
-  }
-  .action-btn {
-    font-family: 'Cinzel', serif;
-    font-size: 0.85rem;
-    letter-spacing: 0.15em;
-    color: var(--bone);
-    background: var(--surface);
-    border: 1px solid var(--blood);
-    padding: 0.7em 1.8em;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .action-btn:hover:not(:disabled) { background: var(--blood); box-shadow: 0 0 15px rgba(139,26,26,0.5); }
-  .action-btn:disabled { opacity: 0.35; cursor: default; }
-  .action-btn.heal-btn { border-color: var(--soul); }
-  .action-btn.heal-btn:hover:not(:disabled) { background: #1a3a4a; box-shadow: 0 0 15px rgba(122,184,212,0.4); }
-
-  /* ── RESULT SCREENS ── */
-  #gameover-screen, #victory-screen {
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 2rem;
-  }
-  #gameover-screen {
-    background: radial-gradient(ellipse at center, #1a0000 0%, var(--void) 70%);
-  }
-  #victory-screen {
-    background: radial-gradient(ellipse at center, #001a2a 0%, var(--void) 70%);
-  }
-  .result-title {
-    font-family: 'Cinzel', serif;
-    font-size: clamp(2rem, 5vw, 4rem);
-    font-weight: 900;
-    letter-spacing: 0.2em;
-    margin-bottom: 0.5em;
-  }
-  #gameover-screen .result-title { color: var(--crimson); text-shadow: 0 0 40px rgba(192,57,43,0.5); }
-  #victory-screen .result-title { color: var(--soul); text-shadow: 0 0 40px rgba(122,184,212,0.5); }
-  .result-body {
-    max-width: 480px;
-    font-size: 1.15rem;
-    line-height: 1.9;
-    font-style: italic;
-    color: var(--ash);
-    margin-bottom: 2.5em;
-  }
-
-  /* damage flash */
-  #flash {
-    position: fixed; inset: 0;
-    pointer-events: none;
-    z-index: 200;
-    opacity: 0;
-    background: var(--crimson);
-    transition: opacity 0.1s;
-  }
-  #flash.active { opacity: 0.25; }
-
-  /* combat result popup */
-  #hit-popup {
-    position: absolute;
-    top: 30px; left: 50%;
-    transform: translateX(-50%);
-    font-family: 'Cinzel', serif;
-    font-size: 1.4rem;
-    font-weight: 700;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.3s, top 0.5s;
-  }
-  #hit-popup.show { opacity: 1; top: 10px; }
-  #hit-popup.perfect { color: #4ac864; }
-  #hit-popup.good { color: var(--gold); }
-  #hit-popup.miss { color: var(--ash); }
+  #flash{position:fixed;inset:0;pointer-events:none;z-index:200;opacity:0;background:var(--crimson);transition:opacity 0.1s}
+  #flash.active{opacity:0.25}
+  #hit-popup{position:absolute;top:30px;left:50%;transform:translateX(-50%);font-family:'Cinzel',serif;font-size:1.3rem;font-weight:700;pointer-events:none;opacity:0;transition:opacity 0.3s,top 0.5s;white-space:nowrap}
+  #hit-popup.show{opacity:1;top:8px}
+  #hit-popup.perfect{color:#4ac864}
+  #hit-popup.good{color:var(--gold)}
+  #hit-popup.miss{color:var(--ash)}
 </style>
 </head>
 <body>
-
 <div id="flash"></div>
+<div id="lore-popup"><div class="lore-title">✦ INSCRIPTIE ✦</div><span id="lore-text"></span></div>
 
 <!-- HUD -->
 <div id="hud">
@@ -366,10 +123,7 @@
     <div class="hp-bar-track"><div class="hp-bar-fill" id="hud-hp-fill" style="width:100%"></div></div>
     <span class="hp-text" id="hud-hp-text">100 / 100</span>
   </div>
-  <div>
-    <span class="hud-label">HEALS</span>
-    <div class="heal-dots" id="heal-dots"></div>
-  </div>
+  <div><span class="hud-label">HEALS</span><div class="heal-dots" id="heal-dots"></div></div>
   <span class="location-tag" id="location-tag">De Hel</span>
 </div>
 
@@ -382,50 +136,40 @@
 </div>
 
 <!-- MAP -->
-<div id="map-screen" class="screen">
-  <canvas id="map-canvas"></canvas>
-</div>
+<div id="map-screen" class="screen"><canvas id="map-canvas"></canvas></div>
 
 <!-- COMBAT -->
 <div id="combat-screen" class="screen">
   <div class="combat-arena">
-    <div class="combatant" id="player-combatant">
-      <img class="combatant-sprite" id="player-sprite" src="Images/Enemy1.png" alt="Speler" onerror="this.src=''">
+    <div class="combatant">
+      <img class="combatant-sprite" id="player-sprite" src="Images/Player.png" alt="Speler" onerror="this.style.visibility='hidden'">
       <div class="combatant-name">JIJ</div>
-      <div class="combatant-hp-track"><div class="combatant-hp-fill" id="player-hp-fill" style="width:100%"></div></div>
+      <div class="combatant-hp-track"><div class="combatant-hp-fill" id="player-hp-fill"></div></div>
     </div>
     <div class="vs-line">✕</div>
-    <div class="combatant" id="enemy-combatant">
+    <div class="combatant">
       <img class="combatant-sprite" id="enemy-sprite" src="" alt="Vijand">
       <div class="combatant-name" id="enemy-name-label">—</div>
-      <div class="combatant-hp-track"><div class="combatant-hp-fill" id="enemy-hp-fill" style="width:100%"></div></div>
+      <div class="combatant-hp-track"><div class="combatant-hp-fill" id="enemy-hp-fill"></div></div>
     </div>
     <div id="hit-popup"></div>
   </div>
-
   <div id="combat-log">...</div>
-
-  <!-- timing attack -->
-  <div id="timing-wrap">
-    <span class="timing-label">AANVALSRITME</span>
-    <div id="timing-track">
-      <div id="timing-zone"></div>
-      <div id="timing-cursor"></div>
+  <div id="attack-wrap">
+    <span class="attack-label">AANVAL — DRUK SPATIE / KLIK</span>
+    <div id="attack-track">
+      <div id="attack-good"></div>
+      <div id="attack-perfect"></div>
+      <div id="attack-cursor"></div>
     </div>
-    <span class="timing-hint">Druk SPATIE of KLIK op het juiste moment</span>
+    <div id="attack-streak-bar"></div>
+    <span style="font-size:0.78rem;color:var(--ash)">Raak de zone — wordt kleiner bij elke hit</span>
   </div>
-
-  <!-- dodge -->
   <div id="dodge-wrap">
-    <span class="dodge-hint">ONTWIJKEN — SPRING MET SPATIE</span>
-    <div id="dodge-countdown"></div>
-    <div id="dodge-track">
-      <div id="dodge-window"></div>
-      <div id="dodge-attack-bar"></div>
-    </div>
-    <span class="timing-hint">Spring als de aanval de blauwe zone bereikt</span>
+    <div id="dodge-attack-name"></div>
+    <canvas id="dodge-arena" width="260" height="200"></canvas>
+    <span id="dodge-hint" style="font-size:0.78rem;color:var(--ash)">Beweeg met WASD / pijltjes</span>
   </div>
-
   <div id="combat-actions">
     <button class="action-btn" id="btn-attack" onclick="playerAttack()">⚔ AANVALLEN</button>
     <button class="action-btn heal-btn" id="btn-heal" onclick="playerHeal()">✦ HELEN</button>
@@ -442,663 +186,639 @@
 <!-- VICTORY -->
 <div id="victory-screen" class="screen">
   <div class="result-title">ONTSNAPT</div>
-  <p class="result-body">Het Onbewustzijn is verslagen. De hel valt uit elkaar.<br>Je ontsnapt en keert terug naar de echte wereld.<br><br><em>Meester Gijs fluistert vanuit de duisternis:<br>"Je hebt gewonnen… voor nu."</em></p>
+  <p class="result-body">De Schaduw Meester Gijs is verslagen. De hel valt uit elkaar.<br>Je ontsnapt en keert terug naar de echte wereld.<br><br><em>"Je hebt gewonnen… voor nu."</em></p>
   <div style="font-family:'Cinzel',serif;font-size:2rem;letter-spacing:0.3em;color:var(--soul);margin-bottom:2rem;text-shadow:0 0 30px rgba(122,184,212,0.6)">YOU ESCAPED</div>
   <button class="btn" onclick="restartGame()">OPNIEUW SPELEN</button>
 </div>
 
 <script>
-// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════
 //  AUDIO
-// ═══════════════════════════════════════════════
-const audios = {};
-function loadAudio(key, src) {
-  const a = new Audio(src);
-  a.loop = ['AmbienceStage1','Battle','Boss1'].includes(key);
-  audios[key] = a;
-}
-loadAudio('AmbienceStage1','Audio/AmbienceStage1.mp3');
-loadAudio('Battle','Audio/Battle.mp3');
-loadAudio('LowHealth','Audio/LowHealth.mp3');
-loadAudio('Boss1','Audio/Boss1.mp3');
+// ═══════════════════════════════════════════
+const SFX = {};
+const MUSIC = {};
 
-let currentMusic = null;
-function playMusic(key) {
-  if (currentMusic === key) return;
+// Music tracks (looping)
+['AmbienceStage1','Battle','Boss1'].forEach(k=>{
+  const a=new Audio(`Audio/${k}.mp3`);
+  a.loop=true; a.volume=0.6;
+  MUSIC[k]=a;
+});
+
+// SFX (one-shot) — LowHealth loops while HP<30 in combat
+const LH=new Audio('Audio/LowHealth.mp3');
+LH.loop=true; LH.volume=0.5;
+SFX.LowHealth=LH;
+
+const DMG=new Audio('Audio/Damage.mp3');
+DMG.volume=0.8; SFX.Damage=DMG;
+
+const ATK=new Audio('Audio/Attack.mp3');
+ATK.volume=0.8; SFX.Attack=ATK;
+
+let currentMusicKey=null;
+let lowHealthPlaying=false;
+
+function playMusic(k){
+  if(currentMusicKey===k) return;
   stopAllMusic();
-  currentMusic = key;
-  const a = audios[key];
-  if (!a) return;
-  a.currentTime = 0;
-  a.play().catch(()=>{});
+  currentMusicKey=k;
+  MUSIC[k].currentTime=0;
+  MUSIC[k].play().catch(()=>{});
 }
-function stopAllMusic() {
-  currentMusic = null;
-  Object.values(audios).forEach(a => { a.pause(); a.currentTime = 0; });
+function stopAllMusic(){
+  currentMusicKey=null;
+  Object.values(MUSIC).forEach(a=>{a.pause();a.currentTime=0;});
+  stopLowHealth();
 }
-function playSfx(key) {
-  const a = audios[key];
-  if (!a) return;
-  const clone = a.cloneNode();
-  clone.play().catch(()=>{});
+function playSfx(key){
+  const a=SFX[key];
+  if(!a) return;
+  const c=a.cloneNode();
+  c.volume=a.volume;
+  c.play().catch(()=>{});
+}
+function startLowHealth(){
+  if(lowHealthPlaying) return;
+  lowHealthPlaying=true;
+  SFX.LowHealth.currentTime=0;
+  SFX.LowHealth.play().catch(()=>{});
+}
+function stopLowHealth(){
+  lowHealthPlaying=false;
+  SFX.LowHealth.pause();
+  SFX.LowHealth.currentTime=0;
+}
+// Check whether to switch to/from LowHealth during combat
+function updateCombatMusic(){
+  if(!STATE.inCombat||isBossFight) return;
+  if(STATE.playerHp<30){
+    if(currentMusicKey==='Battle'){
+      MUSIC['Battle'].pause();
+      currentMusicKey=null;
+    }
+    startLowHealth();
+  } else {
+    stopLowHealth();
+    if(currentMusicKey!=='Battle') playMusic('Battle');
+  }
 }
 
-// ═══════════════════════════════════════════════
-//  SCREEN MANAGER
-// ═══════════════════════════════════════════════
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+// ═══════════════════════════════════════════
+//  SCREENS / HUD
+// ═══════════════════════════════════════════
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  document.getElementById('hud').classList.toggle('visible', ['map-screen','combat-screen'].includes(id));
+  document.getElementById('hud').classList.toggle('visible',id==='map-screen'||id==='combat-screen');
+}
+const STATE={playerHp:100,maxHp:100,heals:3,inBossZone:false,inCombat:false};
+function updateHud(){
+  const pct=Math.max(0,STATE.playerHp)/STATE.maxHp*100;
+  document.getElementById('hud-hp-fill').style.width=pct+'%';
+  document.getElementById('hud-hp-text').textContent=`${Math.max(0,STATE.playerHp)} / ${STATE.maxHp}`;
+  const dots=document.getElementById('heal-dots');
+  dots.innerHTML='';
+  for(let i=0;i<3;i++){const d=document.createElement('div');d.className='heal-dot'+(i>=STATE.heals?' used':'');dots.appendChild(d);}
+}
+function flashDamage(){
+  const f=document.getElementById('flash');
+  f.classList.add('active');
+  setTimeout(()=>f.classList.remove('active'),200);
 }
 
-// ═══════════════════════════════════════════════
-//  GAME STATE
-// ═══════════════════════════════════════════════
-const STATE = {
-  playerHp: 100,
-  maxHp: 100,
-  heals: 3,
-  hitStreak: 0,
-  inBossZone: false,
-  inCombat: false,
-};
+// ═══════════════════════════════════════════
+//  MAP — 5× bigger: 200×125 tiles
+// ═══════════════════════════════════════════
+const MAP_W=200,MAP_H=125,TILE=16;
+const map=[];        // tile values: 0=floor,1=wall,4=boss,5=chest,6=sign
+const chests=[];     // {tx,ty,heals,used}
+const signs=[];      // {tx,ty,text}
+const player={tx:5,ty:5,x:5*16,y:5*16,speed:2.2};
+const keys={};
+let canvas,ctx,camX=0,camY=0,lastTime=0,encounterCooldown=0;
+let loreTimeout=null;
 
-// ═══════════════════════════════════════════════
-//  HUD
-// ═══════════════════════════════════════════════
-function updateHud() {
-  const pct = Math.max(0, STATE.playerHp) / STATE.maxHp * 100;
-  document.getElementById('hud-hp-fill').style.width = pct + '%';
-  document.getElementById('hud-hp-text').textContent = `${Math.max(0,STATE.playerHp)} / ${STATE.maxHp}`;
-  const dots = document.getElementById('heal-dots');
-  dots.innerHTML = '';
-  for (let i = 0; i < 3; i++) {
-    const d = document.createElement('div');
-    d.className = 'heal-dot' + (i >= STATE.heals ? ' used' : '');
-    dots.appendChild(d);
+const LORE_TEXTS=[
+  "Hier stierf de eerste leerling. Hij dacht dat hij kon ontsnappen.",
+  "Meester Gijs weet dat je er bent. Hij wacht op je.",
+  "De hel ruikt naar krijtborden en onvoldoendes.",
+  "Je hoort voetstappen achter je. Als je omkijkt — niets.",
+  "Een ziel fluistert: 'Vlucht. Ga terug. Er is geen weg vooruit.'",
+  "De muren pulseren. Ze zijn van vlees gemaakt.",
+  "Meester Gijs gaf hier ooit les. Zijn leerlingen zijn nooit teruggekeerd.",
+  "'Neef' was hier. Zijn graffiti staat nog op de muur.",
+  "Je voelt zijn aanwezigheid groeien naarmate je vordert.",
+  "De Schaduw weet jouw naam. Hij heeft hem altijd geweten.",
+  "Dit was ooit een schoollokaal. Nu is het een grafkamer.",
+  "Tsjaad de olifant liep hier ooit doorheen. Zijn pootafdrukken zijn er nog.",
+];
+
+function generateMap(){
+  // init all walls
+  for(let y=0;y<MAP_H;y++){map[y]=[];for(let x=0;x<MAP_W;x++)map[y][x]=1;}
+
+  // drunkard's walk to carve open paths
+  let cx=Math.floor(MAP_W/2),cy=Math.floor(MAP_H/2);
+  const steps=MAP_W*MAP_H*0.45;
+  const dirs=[[0,1],[0,-1],[1,0],[-1,0]];
+  map[cy][cx]=0;
+  for(let i=0;i<steps;i++){
+    const [dx,dy]=dirs[Math.floor(Math.random()*4)];
+    cx=Math.max(1,Math.min(MAP_W-2,cx+dx));
+    cy=Math.max(1,Math.min(MAP_H-2,cy+dy));
+    map[cy][cx]=0;
   }
-}
 
-// ═══════════════════════════════════════════════
-//  MAP / CANVAS ENGINE
-// ═══════════════════════════════════════════════
-const MAP_W = 80, MAP_H = 50;
-const TILE = 16;
-let canvas, ctx, camX = 0, camY = 0;
+  // guarantee wide corridors across map
+  for(let x=1;x<MAP_W-1;x++){map[Math.floor(MAP_H/2)][x]=0;map[Math.floor(MAP_H/2)+1][x]=0;}
+  for(let y=1;y<MAP_H-1;y++){map[y][Math.floor(MAP_W/2)]=0;map[y][Math.floor(MAP_W/2)+1]=0;}
 
-// tile types: 0=floor, 1=wall, 2=start, 3=exit, 4=boss
-const map = [];
-
-// simple cave-ish map generation
-function generateMap() {
-  for (let y = 0; y < MAP_H; y++) {
-    map[y] = [];
-    for (let x = 0; x < MAP_W; x++) {
-      // border walls
-      if (x === 0 || y === 0 || x === MAP_W-1 || y === MAP_H-1) { map[y][x] = 1; continue; }
-      // guaranteed corridors
-      if (y === Math.floor(MAP_H/2) || x === Math.floor(MAP_W/2)) { map[y][x] = 0; continue; }
-      map[y][x] = Math.random() < 0.2 ? 1 : 0;
-    }
-  }
   // clear start zone
-  for (let dy = -3; dy <= 3; dy++)
-    for (let dx = -3; dx <= 3; dx++) {
-      const ty = 5+dy, tx = 5+dx;
-      if (ty>0&&ty<MAP_H-1&&tx>0&&tx<MAP_W-1) map[ty][tx] = 0;
+  for(let dy=-4;dy<=4;dy++)for(let dx=-4;dx<=4;dx++){const ty=6+dy,tx=6+dx;if(ty>0&&ty<MAP_H-1&&tx>0&&tx<MAP_W-1)map[ty][tx]=0;}
+  // clear boss zone (top-right corner)
+  for(let dy=-6;dy<=6;dy++)for(let dx=-6;dx<=6;dx++){const ty=8+dy,tx=MAP_W-10+dx;if(ty>0&&ty<MAP_H-1&&tx>0&&tx<MAP_W-1)map[ty][tx]=0;}
+  // connect start to horizontal corridor
+  for(let x=6;x<=Math.floor(MAP_W/2);x++)map[6][x]=0;
+  // connect boss zone to horizontal corridor
+  for(let x=Math.floor(MAP_W/2);x<=MAP_W-10;x++)map[6][x]=0;
+
+  // place boss tile
+  map[8][MAP_W-10]=4;
+
+  // scatter chests (15 total)
+  chests.length=0;
+  let placed=0;
+  while(placed<15){
+    const tx=5+Math.floor(Math.random()*(MAP_W-10));
+    const ty=5+Math.floor(Math.random()*(MAP_H-10));
+    if(map[ty][tx]===0){
+      map[ty][tx]=5;
+      chests.push({tx,ty,used:false});
+      placed++;
     }
-  // clear boss zone (top-right)
-  for (let dy = -4; dy <= 4; dy++)
-    for (let dx = -4; dx <= 4; dx++) {
-      const ty = 4+dy, tx = MAP_W-6+dx;
-      if (ty>0&&ty<MAP_H-1&&tx>0&&tx<MAP_W-1) map[ty][tx] = 0;
-    }
-  map[5][5] = 2; // start marker (just floor with color)
-  map[4][MAP_W-6] = 4; // boss tile
-}
-
-// player position (tile coords)
-const player = { tx: 5, ty: 5, x: 5*TILE, y: 5*TILE, speed: 2 };
-const keys = {};
-
-function initMap() {
-  canvas = document.getElementById('map-canvas');
-  ctx = canvas.getContext('2d');
-  resizeCanvas();
-  window.addEventListener('resize', resizeCanvas);
-  window.addEventListener('keydown', e => {
-    keys[e.code] = true;
-    if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','KeyW','KeyS','KeyA','KeyD'].includes(e.code))
-      e.preventDefault();
-  });
-  window.addEventListener('keyup', e => keys[e.code] = false);
-  requestAnimationFrame(gameLoop);
-}
-
-function resizeCanvas() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-}
-
-let lastTime = 0, encounterCooldown = 0;
-function gameLoop(ts) {
-  requestAnimationFrame(gameLoop);
-  if (STATE.inCombat) return;
-  const dt = Math.min((ts - lastTime) / 16.67, 4);
-  lastTime = ts;
-  if (encounterCooldown > 0) encounterCooldown -= dt;
-
-  const spd = player.speed * dt;
-  let nx = player.x, ny = player.y;
-  if (keys['ArrowLeft']  || keys['KeyA']) nx -= spd;
-  if (keys['ArrowRight'] || keys['KeyD']) nx += spd;
-  if (keys['ArrowUp']    || keys['KeyW']) ny -= spd;
-  if (keys['ArrowDown']  || keys['KeyS']) ny += spd;
-
-  // collision check (center of player = 8px)
-  const cx = nx + 8, cy = ny + 8;
-  const tileAt = (px,py) => {
-    const tx = Math.floor(px/TILE), ty = Math.floor(py/TILE);
-    if (tx<0||ty<0||tx>=MAP_W||ty>=MAP_H) return 1;
-    return map[ty][tx];
-  };
-  if (tileAt(nx+2,ny+2)!==1 && tileAt(nx+14,ny+2)!==1 && tileAt(nx+2,ny+14)!==1 && tileAt(nx+14,ny+14)!==1) {
-    player.x = nx; player.y = ny;
   }
 
-  player.tx = Math.floor((player.x+8)/TILE);
-  player.ty = Math.floor((player.y+8)/TILE);
+  // scatter signs (12 total)
+  signs.length=0;
+  placed=0;
+  const usedTexts=[];
+  while(placed<12){
+    const tx=5+Math.floor(Math.random()*(MAP_W-10));
+    const ty=5+Math.floor(Math.random()*(MAP_H-10));
+    if(map[ty][tx]===0){
+      map[ty][tx]=6;
+      let t;
+      do{t=LORE_TEXTS[Math.floor(Math.random()*LORE_TEXTS.length)];}while(usedTexts.includes(t)&&usedTexts.length<LORE_TEXTS.length);
+      usedTexts.push(t);
+      signs.push({tx,ty,text:t});
+      placed++;
+    }
+  }
+}
 
-  // check tile
-  const cur = map[player.ty]?.[player.tx];
-  const inBoss = (player.tx >= MAP_W-10 && player.ty <= 8);
-  STATE.inBossZone = inBoss;
-  document.getElementById('location-tag').textContent = inBoss ? 'Bewustzijnsruïne' : 'De Hel';
+function initMap(){
+  canvas=document.getElementById('map-canvas');
+  ctx=canvas.getContext('2d');
+  resizeCanvas();
+  window.addEventListener('resize',resizeCanvas);
+  requestAnimationFrame(gameLoop);
+}
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
 
-  if (cur === 4) {
-    // trigger boss fight
-    map[player.ty][player.tx] = 0;
-    triggerCombat(true);
-    return;
+function gameLoop(ts){
+  requestAnimationFrame(gameLoop);
+  if(STATE.inCombat) return;
+  const dt=Math.min((ts-lastTime)/16.67,4);lastTime=ts;
+  if(encounterCooldown>0)encounterCooldown-=dt;
+
+  const spd=player.speed*dt;
+  let nx=player.x,ny=player.y;
+  if(keys['ArrowLeft']||keys['KeyA'])nx-=spd;
+  if(keys['ArrowRight']||keys['KeyD'])nx+=spd;
+  if(keys['ArrowUp']||keys['KeyW'])ny-=spd;
+  if(keys['ArrowDown']||keys['KeyS'])ny+=spd;
+
+  const tileAt=(px,py)=>{const tx=Math.floor(px/TILE),ty=Math.floor(py/TILE);if(tx<0||ty<0||tx>=MAP_W||ty>=MAP_H)return 1;return map[ty][tx];};
+  const passable=(t)=>t!==1;
+  if(passable(tileAt(nx+2,ny+2))&&passable(tileAt(nx+14,ny+2))&&passable(tileAt(nx+2,ny+14))&&passable(tileAt(nx+14,ny+14))){player.x=nx;player.y=ny;}
+
+  player.tx=Math.floor((player.x+8)/TILE);
+  player.ty=Math.floor((player.y+8)/TILE);
+
+  const inBoss=(player.tx>=MAP_W-16&&player.ty<=14);
+  STATE.inBossZone=inBoss;
+  document.getElementById('location-tag').textContent=inBoss?'Bewustzijnsruïne':'De Meester Gijs-hel';
+
+  const curTile=map[player.ty]?.[player.tx];
+
+  // boss trigger
+  if(curTile===4){map[player.ty][player.tx]=0;triggerCombat(true);return;}
+
+  // chest interaction
+  if(curTile===5){
+    const ch=chests.find(c=>c.tx===player.tx&&c.ty===player.ty);
+    if(ch&&!ch.used){
+      ch.used=true;map[player.ty][player.tx]=0;
+      STATE.heals=Math.min(3,STATE.heals+1);
+      updateHud();
+      showLore('Je vindt een kist. Een heal is hersteld! ✦');
+    }
+  }
+
+  // sign interaction
+  if(curTile===6){
+    const sg=signs.find(s=>s.tx===player.tx&&s.ty===player.ty);
+    if(sg) showLore(sg.text);
+  } else {
+    if(loreTimeout) hideLoreNow();
   }
 
   // random encounter
-  if (!inBoss && encounterCooldown <= 0 && Math.random() < 0.003 * dt) {
-    encounterCooldown = 300;
-    triggerCombat(false);
-    return;
+  if(!inBoss&&curTile===0&&encounterCooldown<=0&&Math.random()<0.002*dt){
+    encounterCooldown=360;triggerCombat(false);return;
   }
 
   drawMap();
 }
 
-// color palette for tiles
-const TILE_COLORS = {
-  0: '#0f0a0d', // floor
-  1: '#1a0e15', // wall
-  2: '#0f0a0d',
-  3: '#001a10',
-  4: '#1a0005',
-};
-
-function drawMap() {
-  const W = canvas.width, H = canvas.height;
-  camX = player.x - W/2 + 8;
-  camY = player.y - H/2 + 8;
-
-  ctx.fillStyle = '#0a0608';
-  ctx.fillRect(0,0,W,H);
-
-  const startTX = Math.max(0, Math.floor(camX/TILE)-1);
-  const startTY = Math.max(0, Math.floor(camY/TILE)-1);
-  const endTX = Math.min(MAP_W, startTX + Math.ceil(W/TILE)+2);
-  const endTY = Math.min(MAP_H, startTY + Math.ceil(H/TILE)+2);
-
-  for (let ty = startTY; ty < endTY; ty++) {
-    for (let tx = startTX; tx < endTX; tx++) {
-      const t = map[ty][tx];
-      const sx = tx*TILE - camX;
-      const sy = ty*TILE - camY;
-      ctx.fillStyle = TILE_COLORS[t] || '#0f0a0d';
-      ctx.fillRect(sx, sy, TILE, TILE);
-      if (t === 1) {
-        ctx.fillStyle = 'rgba(139,26,26,0.08)';
-        ctx.fillRect(sx, sy, TILE, 3);
-      }
-      // start marker
-      if (tx===5&&ty===5) {
-        ctx.fillStyle = 'rgba(122,184,212,0.12)';
-        ctx.fillRect(sx,sy,TILE,TILE);
-      }
-      // boss tile
-      if (t===4) {
-        ctx.fillStyle = 'rgba(192,57,43,0.4)';
-        ctx.fillRect(sx,sy,TILE,TILE);
-        ctx.fillStyle = '#c0392b';
-        ctx.font = '10px serif';
-        ctx.fillText('⚠',sx+2,sy+12);
-      }
-    }
-  }
-
-  // boss zone indicator
-  const bossScreenX = (MAP_W-6)*TILE - camX;
-  const bossScreenY = 4*TILE - camY;
-  ctx.strokeStyle = 'rgba(192,57,43,0.3)';
-  ctx.lineWidth = 2;
-  ctx.setLineDash([4,4]);
-  ctx.strokeRect(bossScreenX - 4*TILE, bossScreenY - 4*TILE, 9*TILE, 9*TILE);
-  ctx.setLineDash([]);
-
-  // start zone
-  ctx.strokeStyle = 'rgba(122,184,212,0.2)';
-  ctx.strokeRect(2*TILE-camX, 2*TILE-camY, 7*TILE, 7*TILE);
-
-  // player
-  const px = player.x - camX, py = player.y - camY;
-  ctx.fillStyle = '#7ab8d4';
-  ctx.shadowColor = '#7ab8d4';
-  ctx.shadowBlur = 12;
-  ctx.fillRect(px+2, py+2, 12, 12);
-  ctx.shadowBlur = 0;
-
-  // minimap
-  const mm = 100, mmTW = mm/MAP_W, mmTH = mm/MAP_H;
-  ctx.fillStyle = 'rgba(10,6,8,0.8)';
-  ctx.fillRect(W-mm-12, H-mm-12, mm+4, mm+4);
-  for (let ty = 0; ty < MAP_H; ty++) {
-    for (let tx = 0; tx < MAP_W; tx++) {
-      const t = map[ty][tx];
-      ctx.fillStyle = t===1 ? '#2a1a22' : t===4 ? '#8b1a1a' : '#1e1219';
-      ctx.fillRect(W-mm-10 + tx*mmTW, H-mm-10 + ty*mmTH, mmTW+0.5, mmTH+0.5);
-    }
-  }
-  // player dot on minimap
-  ctx.fillStyle = '#7ab8d4';
-  ctx.fillRect(W-mm-10 + player.tx*mmTW - 1, H-mm-10 + player.ty*mmTH - 1, 3, 3);
+let loreTimer=null;
+function showLore(txt){
+  clearTimeout(loreTimer);
+  document.getElementById('lore-text').textContent=txt;
+  document.getElementById('lore-popup').classList.add('visible');
+  loreTimer=setTimeout(hideLoreNow,4000);
+}
+function hideLoreNow(){
+  clearTimeout(loreTimer);
+  document.getElementById('lore-popup').classList.remove('visible');
 }
 
-// ═══════════════════════════════════════════════
-//  ENEMY DEFINITIONS
-// ═══════════════════════════════════════════════
-const ENEMIES = [
-  {
-    name: 'Schildwacht',
-    sprite: 'Images/Enemy1.png',
-    hp: 40, maxHp: 40,
-    attacks: [
-      { name: 'Zwaardstoot', type: 'sweep', damage: 18, warning: 'trekt zijn zwaard...' },
-      { name: 'Schild Beuken', type: 'slam', damage: 12, warning: 'heft zijn schild...' },
-    ]
-  },
-  {
-    name: 'Schim',
-    sprite: 'Images/Enemy2.png',
-    hp: 30, maxHp: 30,
-    attacks: [
-      { name: 'Greep', type: 'slam', damage: 14, warning: 'grijpt naar je...' },
-      { name: 'Waanvloed', type: 'sweep', damage: 20, warning: 'brult een golf van waanzin...' },
-    ]
-  },
-  {
-    name: 'Helwacht',
-    sprite: 'Images/Enemy3.png',
-    hp: 55, maxHp: 55,
-    attacks: [
-      { name: 'Vuurstomp', type: 'sweep', damage: 22, warning: 'ramt de grond...' },
-      { name: 'Inferno Adem', type: 'slam', damage: 16, warning: 'haalt diep adem...' },
-    ]
-  },
+const TILE_COLORS={0:'#0f0a0d',1:'#18100f',4:'#1a0005',5:'#0a1a10',6:'#100a18'};
+function drawMap(){
+  const W=canvas.width,H=canvas.height;
+  camX=player.x-W/2+8; camY=player.y-H/2+8;
+  ctx.fillStyle='#0a0608';ctx.fillRect(0,0,W,H);
+  const sTX=Math.max(0,Math.floor(camX/TILE)-1),sTY=Math.max(0,Math.floor(camY/TILE)-1);
+  const eTX=Math.min(MAP_W,sTX+Math.ceil(W/TILE)+2),eTY=Math.min(MAP_H,sTY+Math.ceil(H/TILE)+2);
+  for(let ty=sTY;ty<eTY;ty++)for(let tx=sTX;tx<eTX;tx++){
+    const t=map[ty][tx],sx=tx*TILE-camX,sy=ty*TILE-camY;
+    ctx.fillStyle=TILE_COLORS[t]||'#0f0a0d';ctx.fillRect(sx,sy,TILE,TILE);
+    if(t===1){ctx.fillStyle='rgba(80,20,10,0.12)';ctx.fillRect(sx,sy,TILE,3);}
+    if(tx===6&&ty===6){ctx.fillStyle='rgba(122,184,212,0.08)';ctx.fillRect(sx,sy,TILE,TILE);}
+    if(t===4){ctx.fillStyle='rgba(192,57,43,0.5)';ctx.fillRect(sx,sy,TILE,TILE);ctx.fillStyle='#c0392b';ctx.font='10px serif';ctx.fillText('⚠',sx+2,sy+12);}
+    if(t===5){// chest — golden box
+      ctx.fillStyle='#3a2800';ctx.fillRect(sx+2,sy+4,TILE-4,TILE-6);
+      ctx.strokeStyle='#c8a84b';ctx.lineWidth=1;ctx.strokeRect(sx+2,sy+4,TILE-4,TILE-6);
+      ctx.fillStyle='#c8a84b';ctx.font='9px serif';ctx.fillText('✦',sx+4,sy+13);
+    }
+    if(t===6){// sign — dark post
+      ctx.fillStyle='#2a1a0a';ctx.fillRect(sx+5,sy+2,TILE-10,TILE-6);
+      ctx.strokeStyle='#8b5a2b';ctx.lineWidth=1;ctx.strokeRect(sx+5,sy+2,TILE-10,TILE-6);
+      ctx.fillStyle='#8b5a2b';ctx.fillRect(sx+7,sy+TILE-5,2,5);
+    }
+  }
+  // boss zone outline
+  ctx.strokeStyle='rgba(192,57,43,0.2)';ctx.lineWidth=2;ctx.setLineDash([4,4]);
+  ctx.strokeRect((MAP_W-16)*TILE-camX,0-camY,16*TILE,15*TILE);ctx.setLineDash([]);
+  // start zone
+  ctx.strokeStyle='rgba(122,184,212,0.12)';ctx.strokeRect(2*TILE-camX,2*TILE-camY,8*TILE,8*TILE);
+  // player
+  const px=player.x-camX,py=player.y-camY;
+  ctx.fillStyle='#7ab8d4';ctx.shadowColor='#7ab8d4';ctx.shadowBlur=12;
+  ctx.fillRect(px+2,py+2,12,12);ctx.shadowBlur=0;
+  // minimap
+  const mm=120,mTW=mm/MAP_W,mTH=mm/MAP_H;
+  ctx.fillStyle='rgba(10,6,8,0.88)';ctx.fillRect(W-mm-12,H-mm-12,mm+4,mm+4);
+  for(let ty=0;ty<MAP_H;ty++)for(let tx=0;tx<MAP_W;tx++){
+    const t=map[ty][tx];
+    ctx.fillStyle=t===1?'#2a1a22':t===4?'#8b1a1a':t===5?'#3a2800':t===6?'#2a1a0a':'#1e1219';
+    ctx.fillRect(W-mm-10+tx*mTW,H-mm-10+ty*mTH,mTW+0.5,mTH+0.5);
+  }
+  ctx.fillStyle='#7ab8d4';ctx.fillRect(W-mm-10+player.tx*mTW-1,H-mm-10+player.ty*mTH-1,3,3);
+}
+
+// ═══════════════════════════════════════════
+//  ENEMIES
+// ═══════════════════════════════════════════
+const ENEMIES=[
+  {name:'Schildwacht',sprite:'Images/Enemy1.png',hp:40,maxHp:40,attacks:[
+    {name:'Zwaardstoot',type:'sweep',damage:18,warning:'trekt zijn zwaard — ONTWIJKEN!'},
+    {name:'Schild Beuken',type:'slam',damage:12,warning:'heft zijn schild — ONTWIJKEN!'},
+  ]},
+  {name:'Schim',sprite:'Images/Enemy2.png',hp:30,maxHp:30,attacks:[
+    {name:'Waanvloed',type:'sweep',damage:20,warning:'brult een golf van waanzin — ONTWIJKEN!'},
+    {name:'Schaduwgreep',type:'slam',damage:14,warning:'grijpt vanuit de schaduw — ONTWIJKEN!'},
+  ]},
+  {name:'Helwacht',sprite:'Images/Enemy3.png',hp:55,maxHp:55,attacks:[
+    {name:'Inferno Adem',type:'sweep',damage:16,warning:'haalt vurig adem — ONTWIJKEN!'},
+    {name:'Vuurstomp',type:'slam',damage:22,warning:'ramt de grond — ONTWIJKEN!'},
+  ]},
 ];
+const BOSS={name:'Schaduw Meester Gijs',sprite:'Images/Boss1.png',hp:180,maxHp:180,attacks:[
+  {name:'Schaduwgolf',type:'sweep',damage:32,warning:'ontketent een golf van duisternis — ONTWIJKEN!'},
+  {name:'Nachtmerrie Klauw',type:'slam',damage:26,warning:'materialiseert een schaduwklauw — ONTWIJKEN!'},
+]};
 
-const BOSS = {
-  name: 'Het Onbewustzijn',
-  sprite: 'Images/Boss1.png',
-  hp: 150, maxHp: 150,
-  attacks: [
-    { name: 'Gedachtekolk', type: 'sweep', damage: 30, warning: 'laat zijn bewustzijn los op jou...' },
-    { name: 'Nachtmerrie Greep', type: 'slam', damage: 22, warning: 'materialiseert een zwarte klauw...' },
-  ]
-};
+// ═══════════════════════════════════════════
+//  COMBAT STATE
+// ═══════════════════════════════════════════
+let ENEMY=null,combatPhase='player',isBossFight=false;
+let atkAnim=null,dodgeRAF=null;
 
-// ═══════════════════════════════════════════════
-//  COMBAT
-// ═══════════════════════════════════════════════
-let ENEMY = null; // current enemy instance (copy)
-let combatPhase = 'player'; // 'player' | 'timing' | 'dodge' | 'result'
-let timingAnim = null, dodgeAnim = null;
-let timingPos = 0, timingDir = 1;
-let timingZoneLeft = 0, timingZoneWidth = 0;
-let dodgePos = 0, dodgeSpeed = 0;
-let dodgeWindowLeft = 0, dodgeWindowWidth = 0;
-let dodgeResult = null;
-let isBossFight = false;
+function setLog(html){document.getElementById('combat-log').innerHTML=html;}
+function showActions(show){
+  document.getElementById('btn-attack').disabled=!show;
+  document.getElementById('btn-heal').disabled=!show||STATE.heals<=0;
+  document.getElementById('combat-actions').style.opacity=show?'1':'0.3';
+}
+function updateCombatHpBars(){
+  document.getElementById('enemy-hp-fill').style.width=(Math.max(0,ENEMY.hp)/ENEMY.maxHp*100)+'%';
+  document.getElementById('player-hp-fill').style.width=(Math.max(0,STATE.playerHp)/STATE.maxHp*100)+'%';
+  updateHud();
+}
+function showHitPopup(q,dmg){
+  const p=document.getElementById('hit-popup');
+  p.className='show '+q;
+  p.textContent=q==='perfect'?`PERFECT! -${dmg}`:q==='good'?`RAAK! -${dmg}`:'MIS!';
+  setTimeout(()=>p.classList.remove('show'),900);
+}
 
-function triggerCombat(boss) {
-  STATE.inCombat = true;
-  isBossFight = boss;
-  if (boss) {
-    ENEMY = { ...BOSS, hp: BOSS.maxHp, maxHp: BOSS.maxHp };
+function triggerCombat(boss){
+  STATE.inCombat=true;isBossFight=boss;
+  if(boss){
+    ENEMY={...BOSS,hp:BOSS.maxHp};
+    stopLowHealth();
     playMusic('Boss1');
   } else {
-    const def = ENEMIES[Math.floor(Math.random()*ENEMIES.length)];
-    ENEMY = { ...def, hp: def.maxHp, maxHp: def.maxHp };
-    playMusic(STATE.playerHp < 30 ? 'LowHealth' : 'Battle');
+    const d=ENEMIES[Math.floor(Math.random()*ENEMIES.length)];
+    ENEMY={...d,hp:d.maxHp};
+    stopLowHealth();
+    if(STATE.playerHp<30){
+      // start battle music softly, LowHealth overlay
+      playMusic('Battle');
+      startLowHealth();
+    } else {
+      playMusic('Battle');
+    }
   }
-
-  document.getElementById('enemy-sprite').src = ENEMY.sprite;
-  document.getElementById('enemy-name-label').textContent = ENEMY.name;
+  document.getElementById('enemy-sprite').src=ENEMY.sprite;
+  document.getElementById('enemy-name-label').textContent=ENEMY.name;
   updateCombatHpBars();
   setLog(`<strong>${ENEMY.name}</strong> verspert je weg!`);
-  combatPhase = 'player';
-  showActions(true);
-  hideTiming(); hideDodge();
+  combatPhase='player';showActions(true);
+  hideAttack();hideDodge();
+  atkStreak=0;atkZoneW=ATK_ZONE_INIT;
   showScreen('combat-screen');
 }
 
-function setLog(html) { document.getElementById('combat-log').innerHTML = html; }
-function showActions(show) {
-  document.getElementById('btn-attack').disabled = !show;
-  document.getElementById('btn-heal').disabled = !show || STATE.heals <= 0;
-  document.getElementById('combat-actions').style.opacity = show ? '1' : '0.3';
-}
+// ═══════════════════════════════════════════
+//  ATTACK — multi-hit shrinking zone
+// ═══════════════════════════════════════════
+const ATK_ZONE_INIT=30,ATK_ZONE_MIN=6,ATK_SHRINK=4,ATK_MAX_HITS=6;
+const ATK_DMG_PERFECT=[20,28],ATK_DMG_GOOD=[10,17];
+let atkPos=0,atkDir=1,atkSpeed=1.4,atkZoneW=ATK_ZONE_INIT,atkZoneL=35,atkStreak=0,atkActive=false,lastHitQuality='';
 
-function updateCombatHpBars() {
-  const ePct = Math.max(0, ENEMY.hp) / ENEMY.maxHp * 100;
-  const pPct = Math.max(0, STATE.playerHp) / STATE.maxHp * 100;
-  document.getElementById('enemy-hp-fill').style.width = ePct + '%';
-  document.getElementById('player-hp-fill').style.width = pPct + '%';
-  updateHud();
+function hideAttack(){
+  document.getElementById('attack-wrap').classList.remove('visible');
+  if(atkAnim){cancelAnimationFrame(atkAnim);atkAnim=null;}
+  atkActive=false;
 }
-
-function hideTiming() {
-  document.getElementById('timing-wrap').classList.remove('visible');
-  if (timingAnim) { cancelAnimationFrame(timingAnim); timingAnim = null; }
-}
-function hideDodge() {
+function hideDodge(){
   document.getElementById('dodge-wrap').classList.remove('visible');
-  if (dodgeAnim) { cancelAnimationFrame(dodgeAnim); dodgeAnim = null; }
+  if(dodgeRAF){cancelAnimationFrame(dodgeRAF);dodgeRAF=null;}
+}
+function buildStreakPips(){
+  const bar=document.getElementById('attack-streak-bar');
+  bar.innerHTML='';
+  for(let i=0;i<ATK_MAX_HITS;i++){
+    const d=document.createElement('div');d.className='streak-pip';
+    if(i<atkStreak)d.classList.add(i===atkStreak-1&&lastHitQuality==='perfect'?'perfect':'hit');
+    bar.appendChild(d);
+  }
 }
 
-// ── ATTACK TIMING ──
-function playerAttack() {
-  if (combatPhase !== 'player') return;
-  combatPhase = 'timing';
-  showActions(false);
-  hideDodge();
-
-  // zone shrinks with streak, min 8%, max 30%
-  const streakPct = Math.max(8, 30 - STATE.hitStreak * 4);
-  timingZoneWidth = streakPct;
-  timingZoneLeft = 20 + Math.random() * (60 - streakPct); // random but always on screen
-  timingPos = 0; timingDir = 1;
-
-  const zone = document.getElementById('timing-zone');
-  zone.style.left = timingZoneLeft + '%';
-  zone.style.width = timingZoneWidth + '%';
-  zone.classList.remove('perfect-zone');
-
-  // perfect zone = center 40% of zone
-  const perfectLeft = timingZoneLeft + timingZoneWidth*0.3;
-  const perfectW = timingZoneWidth*0.4;
-  // show perfect indicator via second div -- use border trick
-  zone.classList.add('perfect-zone'); // reuse same element, show as perfect always visible
-
-  document.getElementById('timing-wrap').classList.add('visible');
-  setLog('Kies het juiste moment om aan te vallen!');
-
-  const speed = 1.5 + STATE.hitStreak * 0.15;
-  function frame() {
-    timingPos += timingDir * speed;
-    if (timingPos >= 100) { timingPos = 100; timingDir = -1; }
-    if (timingPos <= 0)   { timingPos = 0;   timingDir = 1; }
-    document.getElementById('timing-cursor').style.left = timingPos + '%';
-    timingAnim = requestAnimationFrame(frame);
-  }
-  timingAnim = requestAnimationFrame(frame);
-
-  // listen for input
-  const handler = (e) => {
-    if ((e.type==='keydown'&&e.code==='Space') || e.type==='click') {
+function playerAttack(){
+  if(combatPhase!=='player') return;
+  combatPhase='attack';showActions(false);hideDodge();
+  atkActive=true;
+  atkZoneL=10+Math.random()*(80-atkZoneW);
+  atkSpeed=1.4+atkStreak*0.12;
+  document.getElementById('attack-good').style.left=atkZoneL+'%';
+  document.getElementById('attack-good').style.width=atkZoneW+'%';
+  const pW=atkZoneW*0.35,pL=atkZoneL+atkZoneW*0.325;
+  document.getElementById('attack-perfect').style.left=pL+'%';
+  document.getElementById('attack-perfect').style.width=pW+'%';
+  document.getElementById('attack-wrap').classList.add('visible');
+  buildStreakPips();
+  setLog(`Aanval ${atkStreak+1} — tref de zone!`);
+  function frame(){if(!atkActive)return;atkPos+=atkDir*atkSpeed;if(atkPos>=100){atkPos=100;atkDir=-1;}if(atkPos<=0){atkPos=0;atkDir=1;}document.getElementById('attack-cursor').style.left=atkPos+'%';atkAnim=requestAnimationFrame(frame);}
+  atkAnim=requestAnimationFrame(frame);
+  const handler=(e)=>{
+    if((e.type==='keydown'&&e.code==='Space')||e.type==='click'){
       e.preventDefault();
-      window.removeEventListener('keydown', handler);
-      document.getElementById('timing-track').removeEventListener('click', handler);
-      resolveAttack();
+      window.removeEventListener('keydown',handler);
+      document.getElementById('attack-track').removeEventListener('click',handler);
+      resolveAttackHit();
     }
   };
-  window.addEventListener('keydown', handler);
-  document.getElementById('timing-track').addEventListener('click', handler);
+  window.addEventListener('keydown',handler);
+  document.getElementById('attack-track').addEventListener('click',handler);
 }
 
-function resolveAttack() {
-  hideTiming();
-  combatPhase = 'result';
+function resolveAttackHit(){
+  if(atkAnim){cancelAnimationFrame(atkAnim);atkAnim=null;}
+  atkActive=false;
+  const pL=parseFloat(document.getElementById('attack-perfect').style.left);
+  const pW=parseFloat(document.getElementById('attack-perfect').style.width);
+  const gL=parseFloat(document.getElementById('attack-good').style.left);
+  const gW=parseFloat(document.getElementById('attack-good').style.width);
+  let quality,dmg;
+  if(atkPos>=pL&&atkPos<=pL+pW){quality='perfect';dmg=ATK_DMG_PERFECT[0]+Math.floor(Math.random()*(ATK_DMG_PERFECT[1]-ATK_DMG_PERFECT[0]+1));}
+  else if(atkPos>=gL&&atkPos<=gL+gW){quality='good';dmg=ATK_DMG_GOOD[0]+Math.floor(Math.random()*(ATK_DMG_GOOD[1]-ATK_DMG_GOOD[0]+1));}
+  else{quality='miss';dmg=0;}
+  lastHitQuality=quality;
 
-  const zL = timingZoneLeft, zW = timingZoneWidth;
-  const perfectL = zL + zW*0.3, perfectW = zW*0.4;
-
-  let quality, damage;
-  if (timingPos >= zL && timingPos <= zL+zW) {
-    if (timingPos >= perfectL && timingPos <= perfectL+perfectW) {
-      quality = 'perfect'; damage = 22 + Math.floor(Math.random()*8);
-      STATE.hitStreak++;
-    } else {
-      quality = 'good'; damage = 12 + Math.floor(Math.random()*6);
-      STATE.hitStreak = Math.max(0, STATE.hitStreak - 0);
-      STATE.hitStreak++;
-    }
-  } else {
-    quality = 'miss'; damage = 0;
-    STATE.hitStreak = Math.max(0, STATE.hitStreak - 2);
-    setLog('Je aanval mist volledig...');
-  }
-
-  ENEMY.hp -= damage;
-  if (damage > 0) {
-    document.getElementById('enemy-sprite').classList.add('shake');
-    setTimeout(()=>document.getElementById('enemy-sprite').classList.remove('shake'), 400);
-    flashDamage();
-  }
-
-  // popup
-  const pop = document.getElementById('hit-popup');
-  pop.className = 'show ' + quality;
-  pop.textContent = quality==='perfect' ? `PERFECT! -${damage}` : quality==='good' ? `RAAK! -${damage}` : 'MIS!';
-  setTimeout(()=>pop.classList.remove('show'), 1000);
-
-  if (quality !== 'miss') {
-    setLog(quality==='perfect'
-      ? `<span style="color:#4ac864">PERFECT!</span> Je treft voor <strong>${damage}</strong> schade!`
-      : `Je raakt voor <strong>${damage}</strong> schade.`);
-  }
-
-  updateCombatHpBars();
-
-  if (ENEMY.hp <= 0) { setTimeout(combatVictory, 600); return; }
-
-  setTimeout(enemyAttack, 1000);
-}
-
-// ── HEAL ──
-function playerHeal() {
-  if (combatPhase !== 'player' || STATE.heals <= 0) return;
-  STATE.heals--;
-  const healed = Math.min(30, STATE.maxHp - STATE.playerHp);
-  STATE.playerHp = Math.min(STATE.maxHp, STATE.playerHp + 30);
-  setLog(`Je herstelt <span style="color:#7ab8d4">${healed} HP</span>. (${STATE.heals} heals over)`);
-  updateCombatHpBars();
-  if (STATE.heals === 0) document.getElementById('btn-heal').disabled = true;
-  // small delay before enemy attacks
-  combatPhase = 'result';
-  setTimeout(enemyAttack, 800);
-}
-
-// ── ENEMY ATTACK / DODGE ──
-function enemyAttack() {
-  const atk = ENEMY.attacks[Math.floor(Math.random()*2)];
-  setLog(`<strong>${ENEMY.name}</strong> ${atk.warning}`);
-  combatPhase = 'dodge';
-  showActions(false);
-  hideTiming();
-
-  setTimeout(()=>startDodge(atk), 800);
-}
-
-function startDodge(atk) {
-  document.getElementById('dodge-wrap').classList.add('visible');
-
-  // attack type determines behavior
-  // 'sweep': attack bar comes from left, medium speed, window on right side
-  // 'slam': attack bar comes from top-center, fast, window is left side
-  const track = document.getElementById('dodge-track');
-  const trackW = track.offsetWidth;
-
-  if (atk.type === 'sweep') {
-    dodgePos = -40;
-    dodgeSpeed = isBossFight ? 5 : 3.5;
-    dodgeWindowLeft = 65; dodgeWindowWidth = 15;
-    document.getElementById('dodge-attack-bar').style.height = '100%';
-    document.getElementById('dodge-attack-bar').style.top = '0';
-    document.getElementById('dodge-attack-bar').style.background = 'var(--crimson)';
-  } else { // slam
-    dodgePos = 45; // starts in middle
-    dodgeSpeed = isBossFight ? 7 : 5;
-    dodgeWindowLeft = 5; dodgeWindowWidth = 20;
-    document.getElementById('dodge-attack-bar').style.background = '#e8621a';
-  }
-
-  const win = document.getElementById('dodge-window');
-  win.style.left = dodgeWindowLeft+'%';
-  win.style.width = dodgeWindowWidth+'%';
-
-  // countdown
-  let cd = 3;
-  document.getElementById('dodge-countdown').textContent = cd;
-  const cdInt = setInterval(()=>{
-    cd--;
-    document.getElementById('dodge-countdown').textContent = cd > 0 ? cd : '';
-    if (cd <= 0) clearInterval(cdInt);
-  }, 700);
-
-  setTimeout(()=>{
-    animateDodge(atk);
-  }, 2000);
-}
-
-function animateDodge(atk) {
-  dodgeResult = null;
-  let jumped = false;
-  let jumpPct = null;
-
-  const spaceHandler = (e) => {
-    if (e.code === 'Space' && !jumped) {
-      e.preventDefault();
-      jumped = true;
-      jumpPct = dodgePos;
-    }
-  };
-  window.addEventListener('keydown', spaceHandler);
-
-  function frame() {
-    dodgePos += dodgeSpeed;
-    document.getElementById('dodge-attack-bar').style.left = dodgePos + '%';
-
-    if (dodgePos >= 105) {
-      window.removeEventListener('keydown', spaceHandler);
-      // attack passed — did player jump in time?
-      const hit = jumpPct === null || !(jumpPct >= dodgeWindowLeft && jumpPct <= dodgeWindowLeft + dodgeWindowWidth);
-      resolveDodge(atk, !hit);
-      return;
-    }
-    dodgeAnim = requestAnimationFrame(frame);
-  }
-  dodgeAnim = requestAnimationFrame(frame);
-}
-
-function resolveDodge(atk, dodged) {
-  hideDodge();
-  combatPhase = 'player';
-
-  if (dodged) {
-    setLog(`<span style="color:#4ac864">Je ontwijkt de aanval!</span> Goed gesprongen!`);
-  } else {
-    STATE.playerHp -= atk.damage;
-    flashDamage();
-    document.getElementById('player-sprite').classList.add('shake'); // reuse class
-    setTimeout(()=>document.getElementById('player-sprite').classList.remove('shake'),400);
-    setLog(`<span style="color:#c0392b">${ENEMY.name} raakt je voor ${atk.damage} schade!</span>`);
-    updateCombatHpBars();
-    if (STATE.playerHp <= 0) {
-      setTimeout(gameOver, 800);
-      return;
-    }
-  }
-  updateCombatHpBars();
-
-  setTimeout(()=>{
-    combatPhase = 'player';
-    showActions(true);
-    setLog('Jouw beurt...');
-  }, 700);
-}
-
-// ── COMBAT OUTCOMES ──
-function combatVictory() {
-  hideTiming(); hideDodge();
-  STATE.inCombat = false;
-  if (isBossFight) {
-    stopAllMusic();
-    showScreen('victory-screen');
+  if(quality==='miss'){
+    hideAttack();showHitPopup('miss',0);
+    setLog('Je mist! De aanval stopt.');
+    atkStreak=0;atkZoneW=ATK_ZONE_INIT;
+    combatPhase='result';
+    setTimeout(enemyAttack,900);
     return;
   }
-  setLog('');
+
+  // play Attack SFX
+  playSfx('Attack');
+
+  ENEMY.hp-=dmg;
+  document.getElementById('enemy-sprite').classList.add('shake');
+  setTimeout(()=>document.getElementById('enemy-sprite').classList.remove('shake'),400);
+  showHitPopup(quality,dmg);
+  setLog(quality==='perfect'?`<span style="color:#4ac864">PERFECT!</span> ${dmg} schade!`:`<span style="color:var(--gold)">Raak!</span> ${dmg} schade!`);
+  updateCombatHpBars();
+  atkStreak++;
+  atkZoneW=Math.max(ATK_ZONE_MIN,atkZoneW-ATK_SHRINK);
+
+  if(ENEMY.hp<=0){hideAttack();atkStreak=0;atkZoneW=ATK_ZONE_INIT;setTimeout(combatVictory,600);return;}
+  if(atkStreak>=ATK_MAX_HITS){
+    hideAttack();
+    setLog(`Combo van ${atkStreak} hits! Vijand is aan de beurt.`);
+    atkStreak=0;atkZoneW=ATK_ZONE_INIT;
+    combatPhase='result';setTimeout(enemyAttack,900);return;
+  }
+  setTimeout(()=>{if(combatPhase==='attack')playerAttack();},400);
+}
+
+// ═══════════════════════════════════════════
+//  HEAL
+// ═══════════════════════════════════════════
+function playerHeal(){
+  if(combatPhase!=='player'||STATE.heals<=0) return;
+  STATE.heals--;
+  const h=Math.min(30,STATE.maxHp-STATE.playerHp);
+  STATE.playerHp=Math.min(STATE.maxHp,STATE.playerHp+30);
+  setLog(`Je herstelt <span style="color:#7ab8d4">${h} HP</span>. (${STATE.heals} heals over)`);
+  updateCombatHpBars();
+  updateCombatMusic();
+  combatPhase='result';
+  setTimeout(enemyAttack,800);
+}
+
+// ═══════════════════════════════════════════
+//  DODGE — Undertale arena
+// ═══════════════════════════════════════════
+const ARENA_W=260,ARENA_H=200,ARENA_BORDER=6;
+const SOUL_SIZE=10,SOUL_SPEED=3.2;
+const soul={x:ARENA_W/2,y:ARENA_H*0.75};
+const soulKeys={};
+let projectiles=[],dodgeActive=false,dodgeDamage=0,dodgeHit=false,dodgeDuration=0,dodgeTimer=0;
+let dodgeCtx=null;
+
+function enemyAttack(){
+  const atk=ENEMY.attacks[Math.floor(Math.random()*2)];
+  setLog(`<strong>${ENEMY.name}</strong> ${atk.warning}`);
+  combatPhase='dodge';showActions(false);hideAttack();
+  setTimeout(()=>startDodge(atk),700);
+}
+
+function startDodge(atk){
+  const dc=document.getElementById('dodge-arena');
+  dodgeCtx=dc.getContext('2d');
+  document.getElementById('dodge-attack-name').textContent=atk.name.toUpperCase();
+  document.getElementById('dodge-wrap').classList.add('visible');
+  soul.x=ARENA_W/2;soul.y=ARENA_H*0.75;
+  projectiles=[];dodgeActive=true;dodgeHit=false;
+  dodgeDamage=atk.damage;
+  dodgeDuration=isBossFight?240:170;
+  dodgeTimer=0;
+
+  if(atk.type==='sweep'){
+    const count=isBossFight?4:2;
+    for(let i=0;i<count;i++)projectiles.push({x:-40,y:28+i*Math.floor((ARENA_H-60)/count),w:42,h:15,vx:isBossFight?4.5:2.8,vy:0,color:`hsl(${5+i*12},80%,${44+i*5}%)`});
+  } else {
+    const count=isBossFight?3:2;
+    const sp=Math.floor((ARENA_W-40)/(count+1));
+    for(let i=0;i<count;i++)projectiles.push({x:20+sp*(i+1)-9,y:-50,w:18,h:52,vx:0,vy:isBossFight?5.5:3.5,color:`hsl(${18+i*18},85%,${48+i*6}%)`,delay:i*20});
+  }
+  dodgeRAF=requestAnimationFrame(dodgeLoop);
+}
+
+function dodgeLoop(){
+  if(!dodgeActive) return;
+  dodgeTimer++;
+  if(soulKeys['ArrowLeft']||soulKeys['KeyA'])soul.x=Math.max(ARENA_BORDER+SOUL_SIZE/2,soul.x-SOUL_SPEED);
+  if(soulKeys['ArrowRight']||soulKeys['KeyD'])soul.x=Math.min(ARENA_W-ARENA_BORDER-SOUL_SIZE/2,soul.x+SOUL_SPEED);
+  if(soulKeys['ArrowUp']||soulKeys['KeyW'])soul.y=Math.max(ARENA_BORDER+SOUL_SIZE/2,soul.y-SOUL_SPEED);
+  if(soulKeys['ArrowDown']||soulKeys['KeyS'])soul.y=Math.min(ARENA_H-ARENA_BORDER-SOUL_SIZE/2,soul.y+SOUL_SPEED);
+  for(const p of projectiles){
+    if(p.delay&&p.delay>0){p.delay--;continue;}
+    p.x+=p.vx;p.y+=p.vy;
+    const sl=soul.x-SOUL_SIZE/2,sr=soul.x+SOUL_SIZE/2,st=soul.y-SOUL_SIZE/2,sb=soul.y+SOUL_SIZE/2;
+    if(!dodgeHit&&sr>p.x&&sl<p.x+p.w&&sb>p.y&&st<p.y+p.h){
+      dodgeHit=true;
+      playSfx('Damage'); // play Damage.mp3 on hit
+    }
+  }
+  drawDodgeArena();
+  if(dodgeTimer>=dodgeDuration){finishDodge();return;}
+  dodgeRAF=requestAnimationFrame(dodgeLoop);
+}
+
+function drawDodgeArena(){
+  const dc=dodgeCtx;
+  dc.clearRect(0,0,ARENA_W,ARENA_H);
+  dc.fillStyle='#080408';dc.fillRect(0,0,ARENA_W,ARENA_H);
+  dc.strokeStyle='#7ab8d4';dc.lineWidth=3;dc.strokeRect(ARENA_BORDER,ARENA_BORDER,ARENA_W-ARENA_BORDER*2,ARENA_H-ARENA_BORDER*2);
+  for(const p of projectiles){
+    if(p.delay&&p.delay>0)continue;
+    dc.fillStyle=p.color;dc.shadowColor=p.color;dc.shadowBlur=8;
+    dc.fillRect(p.x,p.y,p.w,p.h);dc.shadowBlur=0;
+  }
+  dc.fillStyle='#ff4488';dc.shadowColor='#ff4488';dc.shadowBlur=10;
+  dc.beginPath();
+  const sx=soul.x,sy=soul.y,ss=SOUL_SIZE/2;
+  dc.moveTo(sx,sy+ss);dc.lineTo(sx+ss,sy);dc.lineTo(sx,sy-ss);dc.lineTo(sx-ss,sy);dc.closePath();
+  dc.fill();dc.shadowBlur=0;
+  const ratio=1-dodgeTimer/dodgeDuration;
+  dc.fillStyle='#2a1a22';dc.fillRect(ARENA_BORDER,ARENA_H-ARENA_BORDER-6,ARENA_W-ARENA_BORDER*2,6);
+  dc.fillStyle=ratio>0.3?'#7ab8d4':'#c0392b';dc.fillRect(ARENA_BORDER,ARENA_H-ARENA_BORDER-6,(ARENA_W-ARENA_BORDER*2)*ratio,6);
+}
+
+function finishDodge(){
+  dodgeActive=false;hideDodge();
+  combatPhase='player';
+  if(dodgeHit){
+    STATE.playerHp-=dodgeDamage;
+    flashDamage();
+    document.getElementById('player-sprite').classList.add('shake');
+    setTimeout(()=>document.getElementById('player-sprite').classList.remove('shake'),400);
+    setLog(`<span style="color:#c0392b">Je werd geraakt voor <strong>${dodgeDamage}</strong> schade!</span>`);
+    updateCombatHpBars();
+    updateCombatMusic();
+    if(STATE.playerHp<=0){setTimeout(gameOver,800);return;}
+  } else {
+    setLog('<span style="color:#4ac864">Je ontweek de aanval volledig!</span>');
+  }
+  atkStreak=0;atkZoneW=ATK_ZONE_INIT;
+  setTimeout(()=>{showActions(true);setLog('Jouw beurt...');},700);
+}
+
+// ═══════════════════════════════════════════
+//  OUTCOMES
+// ═══════════════════════════════════════════
+function combatVictory(){
+  hideAttack();hideDodge();STATE.inCombat=false;
+  if(isBossFight){stopAllMusic();showScreen('victory-screen');return;}
+  stopLowHealth();
   playMusic('AmbienceStage1');
   showScreen('map-screen');
 }
+function gameOver(){stopAllMusic();STATE.inCombat=false;showScreen('gameover-screen');}
 
-function gameOver() {
-  stopAllMusic();
-  STATE.inCombat = false;
-  showScreen('gameover-screen');
-}
+// ═══════════════════════════════════════════
+//  INPUT
+// ═══════════════════════════════════════════
+window.addEventListener('keydown',e=>{
+  if(['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))e.preventDefault();
+  keys[e.code]=true;soulKeys[e.code]=true;
+},{passive:false});
+window.addEventListener('keyup',e=>{keys[e.code]=false;soulKeys[e.code]=false;});
 
-// ── UTILITY ──
-function flashDamage() {
-  const f = document.getElementById('flash');
-  f.classList.add('active');
-  setTimeout(()=>f.classList.remove('active'), 200);
-}
-
-// ═══════════════════════════════════════════════
+// ═══════════════════════════════════════════
 //  INIT / RESTART
-// ═══════════════════════════════════════════════
-function startGame() {
-  STATE.playerHp = 100;
-  STATE.heals = 3;
-  STATE.hitStreak = 0;
-  STATE.inCombat = false;
-  STATE.inBossZone = false;
+// ═══════════════════════════════════════════
+function startGame(){
+  STATE.playerHp=100;STATE.heals=3;STATE.inCombat=false;STATE.inBossZone=false;
+  atkStreak=0;atkZoneW=ATK_ZONE_INIT;
   generateMap();
-  player.x = 5*TILE; player.y = 5*TILE;
-  player.tx = 5; player.ty = 5;
+  player.x=6*TILE;player.y=6*TILE;player.tx=6;player.ty=6;
   updateHud();
   showScreen('map-screen');
   playMusic('AmbienceStage1');
-  if (!canvas) initMap();
-  else requestAnimationFrame(gameLoop);
+  if(!canvas)initMap();else requestAnimationFrame(gameLoop);
 }
-
-function restartGame() {
-  stopAllMusic();
-  showScreen('title-screen');
-}
-
-// prevent space from scrolling page
-window.addEventListener('keydown', e => {
-  if (['Space','ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.code))
-    e.preventDefault();
-}, { passive: false });
+function restartGame(){stopAllMusic();showScreen('title-screen');}
 </script>
 </body>
 </html>
